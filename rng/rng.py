@@ -2,12 +2,17 @@ from dataclasses import dataclass
 from functools import wraps
 from time import perf_counter
 from typing import (
-    Any, Callable, Generator, List, MutableSequence, Optional, Sequence, Union,
+    Any, Callable, Generator, List, Optional, Sequence, Union,
 )
 import math
 
 
-ListOrFloat = Union[List[float], float]
+ListOrNumber = Union[List[float], List[int], float, int]
+
+
+__all__ = (
+    'RNG',
+)
 
 
 class RNG:
@@ -79,7 +84,7 @@ class RNG:
     #                            Main RNG Generator                            #
     ############################################################################
 
-    def _generator(self, size: Optional[int] = 1) -> Generator[float, None, None]:
+    def _generator(self, size: int = 1) -> Generator[float, None, None]:
         assert size >= 1, 'size must be a positive integer'
 
         if not isinstance(size, int):
@@ -98,9 +103,9 @@ class RNG:
     def random(self) -> float:
         return next(self._generator())
 
-    def uniform(self, size: Optional[int] = 1,
-                low: Optional[float] = 0.0,
-                high: Optional[float] = 1.0) -> ListOrFloat:
+    def uniform(self, size: int = 1,
+                low: float = 0.0,
+                high: float = 1.0) -> ListOrNumber:
         assert size >= 1, 'size must be a positive integer'
 
         if high < low:
@@ -113,8 +118,8 @@ class RNG:
 
         return list(res)
 
-    def bernoulli(self, p_success: Optional[float] = 0.5,
-                  size: Optional[int] = 1) -> ListOrFloat:
+    def bernoulli(self, p_success: float = 0.5,
+                  size: int = 1) -> ListOrNumber:
         assert size >= 1, 'size must be a positive integer'
         assert 0. <= p_success <= 1., 'p_success must be in range [0, 1]'
 
@@ -123,23 +128,23 @@ class RNG:
 
         return list(map(lambda x: int(x <= p_success), self._generator(size)))
 
-    def binomial(self, n_trials: Optional[int] = 100,
-                 p_success: Optional[int] = 0.5,
-                 size: Optional[int] = 1) -> ListOrFloat:
+    def binomial(self, n_trials: int = 100,
+                 p_success: float = 0.5,
+                 size: int = 1) -> ListOrNumber:
         assert size >= 1, 'size must be a positive integer'
         assert 0. <= p_success <= 1., 'p_success must be in range [0, 1]'
         assert n_trials >= 1, 'n_trials must be a positive integer'
 
-        res = [sum(map(lambda x: int(x <= p_success),
-                       self._generator(size=n_trials))) for _ in range(size)]
+        res = [float(sum(map(lambda x: int(x <= p_success),
+                             self._generator(size=n_trials)))) for _ in range(size)]
 
         if size == 1:
-            return res[-1]
+            return float(res[-1])
 
         return res
 
-    def poisson(self, lambd: Optional[float] = 1.,
-                size: Optional[int] = 1) -> ListOrFloat:
+    def poisson(self, lambd: float = 1.,
+                size: int = 1) -> ListOrNumber:
         assert size >= 1, 'size must be a positive integer'
         assert lambd > 0, 'lambd must be a positive real value'
 
@@ -156,8 +161,8 @@ class RNG:
 
         return [_poisson() for _ in range(size)]
 
-    def exponential(self, lambd: Optional[float] = 1.,
-                    size: Optional[int] = 1) -> ListOrFloat:
+    def exponential(self, lambd: float = 1.,
+                    size: int = 1) -> ListOrNumber:
         assert size >= 1, 'size must be a positive integer'
         assert lambd > 0, 'lambd must be a positive real value'
 
@@ -169,10 +174,10 @@ class RNG:
 
         return list(map(inverse_transform, self._generator(size=size)))
 
-    def normal(self, mean: Optional[float] = 0., stddev: Optional[float] = 1.,
-               size: Optional[int] = 1) -> ListOrFloat:
+    def normal(self, mean: float = 0., stddev: float = 1.,
+               size: int = 1) -> ListOrNumber:
 
-        def scale(func: Callable[Any, Any]) -> Callable[Any, Any]:
+        def scale(func: Callable[..., Any]) -> Callable[..., Any]:
             @wraps(func)
             def inner(*args, **kwargs) -> float:
                 res = func(*args, **kwargs)
@@ -184,7 +189,7 @@ class RNG:
         # part of the transform
         # Slightly computationally expensive, but visually beautiful
         @scale
-        def box_muller_transform(x: float) -> float:
+        def box_muller_transform(x: tuple[float, float]) -> float:
             return math.sqrt(-2 * math.log(x[0])) * math.cos(2 * math.pi * x[1])
 
         if size == 1:
@@ -214,7 +219,7 @@ class RNG:
 
         return self.choice(list(range(bound1)))
 
-    def randint(self, a: int, b: int = None) -> int:
+    def randint(self, a: int, b: Optional[int] = None) -> int:
         if b is None:
             return self.randrange(0, a + 1)
 
@@ -225,7 +230,7 @@ class RNG:
     ############################################################################
 
     def choice(self, sequence: Sequence[Any],
-               n_samples: Optional[int] = 1,
+               n_samples: int = 1,
                repeat: bool = False) -> Union[Any, List[Any]]:
         assert isinstance(n_samples, int), 'n_samples needs to be an integer'
         assert n_samples >= 1, 'cannot choose lesser than 1 samples'
@@ -247,11 +252,11 @@ class RNG:
 
         return [seq_copy.pop(self.randrange(len(seq_copy))) for _ in range(n_samples)]
 
-    def shuffle(self, sequence: Union[Sequence, MutableSequence]) -> Sequence:
-        if not isinstance(sequence, MutableSequence):
+    def shuffle(self, sequence: List) -> List:
+        if not isinstance(sequence, List):
             sequence = list(sequence)
 
-        def _shuffle(seq: Sequence) -> Sequence:
+        def _shuffle(seq: List) -> List:
             if len(seq) == 1:
                 return seq
 
@@ -278,3 +283,6 @@ class RNG:
             return seq
 
         return _shuffle(sequence)
+
+
+del ListOrNumber

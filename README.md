@@ -7,7 +7,7 @@ RNG is a Python library that provides functions for generating random numbers an
 You can get RNG using `git clone`:
 
 ```bash
-git clone https: // github.com / mkpro118 / RandomNumberGenerator.git
+git clone https://github.com/mkpro118/RandomNumberGenerator.git
 ```
 
 # Usage

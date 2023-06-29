@@ -1,6 +1,6 @@
 # RNG
 
-RNG is a Python library that provides functions for generating random numbers and performing random operations. It offers a simple interface for generating random values from various distributions and manipulating sequences randomly. The library is built upon the RNG(Random Number Generator) class, providing a flexible and customizable random number generation process.
+RNG is a Python library that provides functions for generating random numbers and performing random operations. It offers a simple interface for generating random values from various distributions and manipulating sequences randomly. The library is built upon the [RNG(Random Number Generator) class](https://github.com/mkpro118/RandomNumberGenerator/blob/main/rng/rng.py#L18-L688), providing a flexible and customizable random number generation process.
 
 # Installation
 
@@ -46,4 +46,4 @@ Contributions to RNG are welcome! If you encounter any issues, have suggestions 
 
 # License
 
-RNG is licensed under the MIT License. See the LICENSE file for more information.
+RNG is licensed under the MIT License. See the [LICENSE file](https://github.com/mkpro118/RandomNumberGenerator/blob/main/LICENSE) for more information.
